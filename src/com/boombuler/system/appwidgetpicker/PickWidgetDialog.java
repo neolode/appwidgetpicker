@@ -21,76 +21,72 @@ import android.content.DialogInterface.OnCancelListener;
 
 public class PickWidgetDialog {
 
-	AlertDialog fDialog;
-	private final AppWidgetPickerActivity fOwner;
+    private final AppWidgetPickerActivity fOwner;
+    AlertDialog fDialog;
+    ItemAdapter fItemAdapter;
 
-	private class ClickListener implements DialogInterface.OnClickListener {
+    public PickWidgetDialog(AppWidgetPickerActivity owner) {
+        fOwner = owner;
+    }
 
-		public ClickListener() {
-		}
+    public void showDialog(SubItem subItem) {
+        if (subItem == null || subItem instanceof Item) {
+            AlertDialog.Builder ab = new AlertDialog.Builder(fOwner);
 
-		@Override
-		public void onClick(DialogInterface dialog, int which) {
-			SubItem subItem = PickWidgetDialog.this.fItemAdapter.getItem(which);
-			PickWidgetDialog.this.fDialog.dismiss();
+            if (subItem == null) {
+                ab.setTitle(fOwner.getString(R.string.widget_picker_title));
+                fItemAdapter = new ItemAdapter(fOwner, 0, fOwner.getItems());
+                ab.setAdapter(fItemAdapter, new ClickListener());
+            } else {
+                Item itm = (Item)subItem;
+                if (itm.getItems().size() == 1) {
+                    fOwner.finishOk(itm.getItems().get(0));
+                    return;
+                }
 
-			PickWidgetDialog.this.showDialog(subItem);
-		}
+                ab.setTitle(subItem.getName());
+                fItemAdapter = new ItemAdapter(fOwner, 0, itm.getItems());
+                ab.setAdapter(fItemAdapter, new ClickListener());
+            }
 
-	}
+            ab.setOnCancelListener(new CancelListener(subItem == null));
+            fDialog = ab.create();
+            fDialog.show();
+        } else {
+            fOwner.finishOk(subItem);
+        }
+    }
 
-	private class CancelListener implements OnCancelListener {
-		private final boolean fCancelOwner;
+    private class ClickListener implements DialogInterface.OnClickListener {
 
-		public CancelListener(boolean cancelOwner) {
-			fCancelOwner = cancelOwner;
-		}
+        public ClickListener() {
+        }
 
-		@Override
-		public void onCancel(DialogInterface dialog) {
-			if (fCancelOwner) {
-				PickWidgetDialog.this.fOwner.setResult(AppWidgetPickerActivity.RESULT_CANCELED);
-				PickWidgetDialog.this.fOwner.finish();
-			} else {
-				PickWidgetDialog.this.showDialog(null);
-			}
-		}
-	}
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            SubItem subItem = PickWidgetDialog.this.fItemAdapter.getItem(which);
+            PickWidgetDialog.this.fDialog.dismiss();
 
+            PickWidgetDialog.this.showDialog(subItem);
+        }
 
+    }
 
-	public PickWidgetDialog(AppWidgetPickerActivity owner) {
-		fOwner = owner;
-	}
+    private class CancelListener implements OnCancelListener {
+        private final boolean fCancelOwner;
 
-	ItemAdapter fItemAdapter;
+        public CancelListener(boolean cancelOwner) {
+            fCancelOwner = cancelOwner;
+        }
 
-	public void showDialog(SubItem subItem) {
-		if (subItem == null || subItem instanceof Item) {
-			AlertDialog.Builder ab = new AlertDialog.Builder(fOwner);
-
-			if (subItem == null) {
-				ab.setTitle(fOwner.getString(R.string.widget_picker_title));
-				fItemAdapter = new ItemAdapter(fOwner, 0, fOwner.getItems());
-				ab.setAdapter(fItemAdapter, new ClickListener());
-			}
-			else {
-				Item itm = (Item)subItem;
-				if (itm.getItems().size() == 1) {
-					fOwner.finishOk(itm.getItems().get(0));
-					return;
-				}
-
-				ab.setTitle(subItem.getName());
-				fItemAdapter = new ItemAdapter(fOwner, 0, itm.getItems());
-				ab.setAdapter(fItemAdapter, new ClickListener());
-			}
-
-			ab.setOnCancelListener(new CancelListener(subItem == null));
-			fDialog =  ab.create();
-			fDialog.show();
-		}
-		else
-			fOwner.finishOk(subItem);
-	}
+        @Override
+        public void onCancel(DialogInterface dialog) {
+            if (fCancelOwner) {
+                PickWidgetDialog.this.fOwner.setResult(AppWidgetPickerActivity.RESULT_CANCELED);
+                PickWidgetDialog.this.fOwner.finish();
+            } else {
+                PickWidgetDialog.this.showDialog(null);
+            }
+        }
+    }
 }

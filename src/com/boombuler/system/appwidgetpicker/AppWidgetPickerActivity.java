@@ -16,11 +16,6 @@
 
 package com.boombuler.system.appwidgetpicker;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
@@ -32,6 +27,13 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.view.Window;
 import android.widget.Toast;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class AppWidgetPickerActivity extends Activity {
 
@@ -84,24 +86,32 @@ public class AppWidgetPickerActivity extends Activity {
 
 
 	public void finishOk(SubItem item) {
-        int result;
         if (item.getExtra() != null) {
             // If there are any extras, it's because this entry is custom.
             // Don't try to bind it, just pass it back to the app.
             setResult(RESULT_OK, getIntent(item));
         } else {
+            int result;
             try {
-                fAppWManager.bindAppWidgetId(fAppWidgetId, item.getProvider());
+                // TODO check on 4.x
+                bindAppWidgetId(fAppWidgetId, item.getProvider());
                 result = RESULT_OK;
+            } catch (SecurityException e) {
+                Toast.makeText(this, R.string.secyrity_err, Toast.LENGTH_LONG).show();
+                result = RESULT_CANCELED;
+            } catch (InvocationTargetException e) {
+                Toast.makeText(this, R.string.secyrity_err, Toast.LENGTH_LONG).show();
+                result = RESULT_CANCELED;
+            } catch (IllegalAccessException e) {
+                result = RESULT_CANCELED;
+            } catch (NoSuchMethodException e) {
+                result = RESULT_CANCELED;
             } catch (IllegalArgumentException e) {
                 // This is thrown if they're already bound, or otherwise somehow
                 // bogus.  Set the result to canceled, and exit.  The app *should*
                 // clean up at this point.  We could pass the error along, but
                 // it's not clear that that's useful -- the widget will simply not
                 // appear.
-                result = RESULT_CANCELED;
-            } catch (SecurityException e) {
-                Toast.makeText(this, R.string.secyrity_err, Toast.LENGTH_SHORT).show();
                 result = RESULT_CANCELED;
             }
             setResult(result, fIntent);
@@ -248,5 +258,13 @@ public class AppWidgetPickerActivity extends Activity {
 
             fItems.add(item);
         }
+    }
+
+    private void bindAppWidgetId(int id, ComponentName provider)
+            throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        Class[] argTypes = new Class[]{int.class, ComponentName.class};
+        Method m = AppWidgetManager.class.getMethod("bindAppWidgetId", argTypes);
+        Object[] args = new Object[]{id, provider};
+        m.invoke(fAppWManager, args);
     }
 }

@@ -1,45 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-   	android:orientation="horizontal"  
-   	android:paddingTop="2dip"
-	android:paddingBottom="2dip"
-	android:layout_width="fill_parent"
-	android:layout_height="wrap_content">
-  
-	<ImageView 
-	    android:id="@+id/appwidgetpicker_imageview" 
-	    android:layout_marginLeft="10dip"
-	    android:layout_marginTop="2dip"
-	    android:layout_marginBottom="2dip"
-	    android:src="@drawable/icon"
-	    android:layout_width="48dip" 
-	    android:layout_height="48dip" />
-    
-	<LinearLayout 
-		android:layout_width="fill_parent" 
-		android:layout_height="wrap_content"
-		android:layout_toRightOf="@id/appwidgetpicker_imageview" 
-		android:layout_centerVertical="true"
-		android:layout_marginLeft="10dip"
-		android:layout_marginTop="2dip"
-		android:layout_marginBottom="2dip"
-		android:orientation="vertical">
-    
-	    <TextView
-	    	android:id="@+id/appwidgetpicker_textview"
-	    	android:layout_width="fill_parent" 
-	        android:layout_height="wrap_content"
-	        android:textColor="#FFF"
-	        android:textSize="20dip" />
-      
-	    <TextView 
-	        android:id="@+id/appwidgetpicker_count"
-	        android:layout_width="fill_parent" 
-	        android:layout_height="wrap_content"
-	        android:textSize="13dip"
-	        android:textColor="#FFF" />
-        
-	</LinearLayout>
-  
-</RelativeLayout>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content" android:gravity="center_vertical">
+    <ImageView android:layout_width="48dp"
+               android:layout_height="48dp"
+               android:id="@+id/icon"
+               android:src="@drawable/icon"
+               android:layout_marginLeft="8dp"
+               android:layout_marginTop="8dp"
+               android:layout_marginRight="8dp"
+               android:layout_marginBottom="8dp"/>
+    <LinearLayout android:orientation="vertical"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center_vertical">
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="Widget name"
+                  android:id="@+id/name"
+                  style="@style/widget_name"/>
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:id="@+id/count"
+                  android:text="(4 widgets)"
+                  style="@style/widget_count"/>
+    </LinearLayout>
+</LinearLayout>

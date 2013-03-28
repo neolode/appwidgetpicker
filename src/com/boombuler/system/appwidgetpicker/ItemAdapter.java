@@ -15,8 +15,6 @@
  */
 package com.boombuler.system.appwidgetpicker;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +22,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.util.ArrayList;
 
 
 public class ItemAdapter extends ArrayAdapter<SubItem> {
@@ -46,9 +46,9 @@ public class ItemAdapter extends ArrayAdapter<SubItem> {
         SubItem o = items.get(position);
         v.setTag(o);
         if (o != null) {
-            TextView tv = (TextView) v.findViewById(R.id.appwidgetpicker_textview);
-            TextView count_view = (TextView) v.findViewById(R.id.appwidgetpicker_count);
-            ImageView iv = (ImageView) v.findViewById(R.id.appwidgetpicker_imageview);
+            TextView tv = (TextView) v.findViewById(R.id.name);
+            TextView count_view = (TextView) v.findViewById(R.id.count);
+            ImageView iv = (ImageView) v.findViewById(R.id.icon);
             if (tv != null) {
                   tv.setText(o.getName());
             }

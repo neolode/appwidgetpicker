@@ -116,7 +116,7 @@ public class AppWidgetPickerActivity extends Activity {
      * {@link Intent#ACTION_CREATE_SHORTCUT} filled with the item label.
      */
     private Intent getIntent(SubItem itm) {
-    	Intent intent = null;
+    	Intent intent;
         Parcelable parcel = fIntent.getParcelableExtra(Intent.EXTRA_INTENT);
         if (parcel instanceof Intent) {
             intent = new Intent((Intent) parcel);
@@ -159,7 +159,7 @@ public class AppWidgetPickerActivity extends Activity {
 			fItems.add(newItm);
 			return newItm;
 		}
-		catch(PackageManager.NameNotFoundException expt) {
+		catch(PackageManager.NameNotFoundException ignored) {
 		}
 		return null;
 	}
@@ -176,7 +176,7 @@ public class AppWidgetPickerActivity extends Activity {
 				Item mainItm = getPackageItem(info);
 				mainItm.getItems().add(itm);
 			}
-			catch(PackageManager.NameNotFoundException expt) {
+			catch(PackageManager.NameNotFoundException ignored) {
 			}
 		}
 	}
@@ -185,7 +185,7 @@ public class AppWidgetPickerActivity extends Activity {
         final Bundle extras = fIntent.getExtras();
 
         // get and validate the extras they gave us
-        ArrayList<AppWidgetProviderInfo> customInfo = null;
+        ArrayList<AppWidgetProviderInfo> customInfo;
         ArrayList<Bundle> customExtras = null;
         try_custom_items: {
             customInfo = extras.getParcelableArrayList(AppWidgetManager.EXTRA_CUSTOM_INFO);
@@ -231,7 +231,7 @@ public class AppWidgetPickerActivity extends Activity {
         for (int i = 0; i < size; i++) {
             AppWidgetProviderInfo info = appWidgets.get(i);
 
-            String label = info.label.toString();
+            String label = info.label;
             Drawable icon = null;
 
             if (info.icon != 0) {

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.boombuler.system.appwidgetpicker;
 
 import android.content.Context;
@@ -27,49 +28,42 @@ import java.util.ArrayList;
 
 
 public class ItemAdapter extends ArrayAdapter<SubItem> {
-	private final ArrayList<SubItem> items;
-	private final Context fContext;
+    private final ArrayList<SubItem> items;
+    private final Context fContext;
+    private LayoutInflater inflater;
 
-	public ItemAdapter(Context context, int textViewResourceId, ArrayList<SubItem> items) {
+    public ItemAdapter(Context context, int textViewResourceId, ArrayList<SubItem> items) {
         super(context, textViewResourceId, items);
         this.items = items;
         fContext = context;
-	}
+        inflater = (LayoutInflater)fContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    }
 
-	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
         View v = convertView;
         if (v == null) {
-            LayoutInflater vi = (LayoutInflater)fContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            v = vi.inflate(R.layout.appwidgetpicker, null);
+            v = inflater.inflate(R.layout.appwidgetpicker, null);
         }
         SubItem o = items.get(position);
-        v.setTag(o);
-        if (o != null) {
-            TextView tv = (TextView) v.findViewById(R.id.name);
-            TextView count_view = (TextView) v.findViewById(R.id.count);
-            ImageView iv = (ImageView) v.findViewById(R.id.icon);
-            if (tv != null) {
-                  tv.setText(o.getName());
-            }
-            if (count_view != null) {
-            	if (o instanceof Item)
-            	{
-            		int cnt = ((Item)o).getItems().size();
-            		if (cnt > 1) {
-            			count_view.setText(String.format(fContext.getString(R.string.widget_count), cnt));
-            			count_view.setVisibility(View.VISIBLE);
-            		}
-            		else
-            			count_view.setVisibility(View.GONE);
-            	}
-            	else
-            		count_view.setVisibility(View.GONE);
-            }
-            if(iv != null){
-            	iv.setImageDrawable(o.getImage());
-            }
+        TextView nameView = (TextView)v.findViewById(R.id.name);
+        TextView countView = (TextView)v.findViewById(R.id.count);
+        ImageView imageView = (ImageView)v.findViewById(R.id.icon);
+        if (nameView != null) {
+            nameView.setText(o.getName());
         }
+        if (o instanceof Item) {
+            int cnt = ((Item)o).getItems().size();
+            if (cnt > 1) {
+                countView.setText(String.format(fContext.getString(R.string.widget_count), cnt));
+                countView.setVisibility(View.VISIBLE);
+            } else {
+                countView.setVisibility(View.GONE);
+            }
+        } else {
+            countView.setVisibility(View.GONE);
+        }
+        imageView.setImageDrawable(o.getImage());
         return v;
     }
 }

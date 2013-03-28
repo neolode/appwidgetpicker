@@ -25,7 +25,6 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.view.Window;
 import android.widget.Toast;
 
 import java.lang.reflect.InvocationTargetException;
@@ -36,7 +35,6 @@ import java.util.Comparator;
 import java.util.List;
 
 public class AppWidgetPickerActivity extends Activity {
-
 	private Intent fIntent = null;
 	private PackageManager fPManager = null;
 	private AppWidgetManager fAppWManager = null;
@@ -46,14 +44,9 @@ public class AppWidgetPickerActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		this.setTitle("");
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-		fIntent = getIntent();
-
 		final Intent intent = getIntent();
         if (intent.hasExtra(AppWidgetManager.EXTRA_APPWIDGET_ID)) {
-            fAppWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
+            fAppWidgetId = fIntent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
                     AppWidgetManager.INVALID_APPWIDGET_ID);
             fPManager = getPackageManager();
     		fAppWManager = AppWidgetManager.getInstance(this);
@@ -62,7 +55,6 @@ public class AppWidgetPickerActivity extends Activity {
     		AddAppWidgetProviderInfos();
     		AddCustomAppWidgets();
     		Collections.sort(fItems, new Comparator<SubItem>() {
-
 				@Override
 				public int compare(SubItem object1, SubItem object2) {
 					return object1.getName().compareToIgnoreCase(object2.getName());
@@ -83,7 +75,6 @@ public class AppWidgetPickerActivity extends Activity {
 	public ArrayList<SubItem> getItems() {
 		return fItems;
 	}
-
 
 	public void finishOk(SubItem item) {
         if (item.getExtra() != null) {

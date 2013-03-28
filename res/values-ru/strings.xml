@@ -2,4 +2,5 @@
 <resources>
     <string name="widget_picker_title">Виджеты</string>
     <string name="widget_count">Виджетов в группе: %d</string>
+    <string name="secyrity_err">Для корректной работы приложения необходимо установить его как системное</string>
 </resources>

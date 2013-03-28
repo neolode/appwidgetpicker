@@ -31,6 +31,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.view.Window;
+import android.widget.Toast;
 
 public class AppWidgetPickerActivity extends Activity {
 
@@ -98,6 +99,9 @@ public class AppWidgetPickerActivity extends Activity {
                 // clean up at this point.  We could pass the error along, but
                 // it's not clear that that's useful -- the widget will simply not
                 // appear.
+                result = RESULT_CANCELED;
+            } catch (SecurityException e) {
+                Toast.makeText(this, R.string.secyrity_err, Toast.LENGTH_SHORT).show();
                 result = RESULT_CANCELED;
             }
             setResult(result, fIntent);

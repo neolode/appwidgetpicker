@@ -2,7 +2,5 @@
 <resources>
     <string name="app_name">AppWidgetPicker</string>
     <string name="widget_picker_title">Choose widget</string>
-    <string name="widget_count">(%d widgets)</string>
-    <string name="foo_widget">Foowidget</string>
-    <string name="four_widgets">(4 widgets)</string>
+    <string name="widget_count">%d widgets</string>
 </resources>

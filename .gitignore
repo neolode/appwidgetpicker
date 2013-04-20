@@ -1,0 +1,7 @@
+.idea
+bin
+gen
+out
+build.xml
+*.iml
+*.apk

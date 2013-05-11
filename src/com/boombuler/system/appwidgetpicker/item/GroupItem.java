@@ -16,8 +16,6 @@
 package com.boombuler.system.appwidgetpicker.item;
 
 import android.graphics.drawable.Drawable;
-import com.boombuler.system.appwidgetpicker.item.BaseItem;
-import com.boombuler.system.appwidgetpicker.item.ItemComparator;
 
 import java.util.ArrayList;
 import java.util.Collections;

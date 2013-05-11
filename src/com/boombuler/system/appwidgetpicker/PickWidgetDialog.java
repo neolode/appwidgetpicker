@@ -66,8 +66,6 @@ public class PickWidgetDialog {
     }
 
     private class ClickListener implements DialogInterface.OnClickListener {
-        private PickWidgetDialog dialog = PickWidgetDialog.this;
-
         @Override
         public void onClick(DialogInterface dialog, int which) {
             BaseItem subItem = PickWidgetDialog.this.adapter.getItem(which);

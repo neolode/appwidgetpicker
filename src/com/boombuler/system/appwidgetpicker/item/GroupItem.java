@@ -13,42 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.boombuler.system.appwidgetpicker;
+package com.boombuler.system.appwidgetpicker.item;
 
 import android.graphics.drawable.Drawable;
+import com.boombuler.system.appwidgetpicker.item.BaseItem;
+import com.boombuler.system.appwidgetpicker.item.ItemComparator;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 
-public class Item extends SubItem {
-    private final ArrayList<SubItem> fItems = new ArrayList<SubItem>();
+public class GroupItem extends BaseItem {
+    private final ArrayList<BaseItem> fItems = new ArrayList<BaseItem>();
     private String fPackageName;
 
-    public Item(String name, Drawable image) {
+    public GroupItem(String name, Drawable image) {
         super(name, image);
     }
 
-    public ArrayList<SubItem> getItems() {
+    public ArrayList<BaseItem> getItems() {
         return fItems;
     }
 
-    @Override
     public String getName() {
         if (fItems.size() == 1) {
             return fItems.get(0).getName();
-        } else {
-            return super.getName();
         }
+        return fName;
     }
 
-    @Override
     public Drawable getImage() {
         if (fItems.size() == 1) {
             return fItems.get(0).getImage();
-        } else {
-            return super.getImage();
         }
+        return fImage;
     }
 
     public String getPackageName() {
@@ -60,13 +57,6 @@ public class Item extends SubItem {
     }
 
     public void sort() {
-        Collections.sort(fItems, new Comparator<SubItem>() {
-
-            @Override
-            public int compare(SubItem object1, SubItem object2) {
-                return object1.getName().compareToIgnoreCase(object2.getName());
-            }
-
-        });
+        Collections.sort(fItems, new ItemComparator());
     }
 }

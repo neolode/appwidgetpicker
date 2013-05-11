@@ -23,60 +23,52 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.widget.Toast;
+import com.boombuler.system.appwidgetpicker.item.BaseItem;
+import com.boombuler.system.appwidgetpicker.item.GroupItem;
+import com.boombuler.system.appwidgetpicker.item.ItemComparator;
+import com.boombuler.system.appwidgetpicker.item.WidgetItem;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class AppWidgetPickerActivity extends Activity {
-    private Intent fIntent = null;
-    private PackageManager fPManager = null;
-    private AppWidgetManager fAppWManager = null;
-    private ArrayList<SubItem> fItems;
-    private int fAppWidgetId;
+    private Intent startIntent;
+    private PackageManager pkgManager;
+    private AppWidgetManager appManager;
+    private ArrayList<BaseItem> items;
+    private int widgetId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final Intent intent = getIntent();
-        if (intent.hasExtra(AppWidgetManager.EXTRA_APPWIDGET_ID)) {
-            fAppWidgetId = fIntent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
-                    AppWidgetManager.INVALID_APPWIDGET_ID);
-            fPManager = getPackageManager();
-            fAppWManager = AppWidgetManager.getInstance(this);
+        startIntent = getIntent();
+        if (startIntent.hasExtra(AppWidgetManager.EXTRA_APPWIDGET_ID)) {
+            widgetId = startIntent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
+            pkgManager = getPackageManager();
+            appManager = AppWidgetManager.getInstance(this);
 
-            fItems = new ArrayList<SubItem>();
-            AddAppWidgetProviderInfos();
-            AddCustomAppWidgets();
-            Collections.sort(fItems, new Comparator<SubItem>() {
-                @Override
-                public int compare(SubItem object1, SubItem object2) {
-                    return object1.getName().compareToIgnoreCase(object2.getName());
-                }
+            addAppWidgetProviderInfos();
+            addCustomAppWidgets();
+            sortItems();
 
-            });
-            for (SubItem itm : fItems) {
-                if (itm instanceof Item) {
-                    ((Item)itm).sort();
-                }
-            }
-            new PickWidgetDialog(this).showDialog(null);
+            new PickWidgetDialog(this).showDialog();
         } else {
             finish();
         }
     }
 
-    public ArrayList<SubItem> getItems() {
-        return fItems;
+    public ArrayList<BaseItem> getWidgetList() {
+        return items;
     }
 
-    public void finishOk(SubItem item) {
+    public void pickWidget(WidgetItem item) {
         if (item.getExtra() != null) {
             // If there are any extras, it's because this entry is custom.
             // Don't try to bind it, just pass it back to the app.
@@ -84,8 +76,7 @@ public class AppWidgetPickerActivity extends Activity {
         } else {
             int result;
             try {
-                // TODO check on 4.x
-                bindAppWidgetId(fAppWidgetId, item.getProvider());
+                bindAppWidgetId(widgetId, item.getProvider());
                 result = RESULT_OK;
             } catch (SecurityException e) {
                 Toast.makeText(this, R.string.secyrity_err, Toast.LENGTH_LONG).show();
@@ -105,19 +96,14 @@ public class AppWidgetPickerActivity extends Activity {
                 // appear.
                 result = RESULT_CANCELED;
             }
-            setResult(result, fIntent);
+            setResult(result, startIntent);
         }
         finish();
     }
 
-    /**
-     * Build the {@link Intent} described by this item. If this item
-     * can't create a valid {@link ComponentName}, it will return
-     * {@link Intent#ACTION_CREATE_SHORTCUT} filled with the item label.
-     */
-    private Intent getIntent(SubItem itm) {
+    private Intent getIntent(WidgetItem itm) {
         Intent intent;
-        Parcelable parcel = fIntent.getParcelableExtra(Intent.EXTRA_INTENT);
+        Parcelable parcel = startIntent.getParcelableExtra(Intent.EXTRA_INTENT);
         if (parcel instanceof Intent) {
             intent = new Intent((Intent)parcel);
         } else {
@@ -139,52 +125,48 @@ public class AppWidgetPickerActivity extends Activity {
         return intent;
     }
 
-    private Item getPackageItem(AppWidgetProviderInfo info) {
-        String packName = info.provider.getPackageName();
-        for (SubItem itm : fItems) {
-            if (itm instanceof Item) {
-                Item i = (Item)itm;
-                if (i.getPackageName().equals(packName)) {
+    private GroupItem getPackageItem(String pkgName) {
+        for (BaseItem itm : items) {
+            if (itm instanceof GroupItem) {
+                GroupItem i = (GroupItem)itm;
+                if (i.getPackageName().equals(pkgName)) {
                     return i;
                 }
             }
         }
-        try {
-            android.content.pm.ApplicationInfo appInfo = fPManager.getApplicationInfo(info.provider.getPackageName(), 0);
-            Drawable appIcon = fPManager.getApplicationIcon(appInfo);
-            CharSequence str = fPManager.getApplicationLabel(appInfo);
-            Item newItm = new Item(str.toString(), appIcon);
-            newItm.setPackageName(packName);
-            fItems.add(newItm);
-            return newItm;
-        } catch (PackageManager.NameNotFoundException ignored) {
-        }
         return null;
     }
 
-    private void AddAppWidgetProviderInfos() {
-        List<AppWidgetProviderInfo> infos = fAppWManager.getInstalledProviders();
-
+    private void addAppWidgetProviderInfos() {
+        items = new ArrayList<BaseItem>();
+        List<AppWidgetProviderInfo> infos = appManager.getInstalledProviders();
         for (AppWidgetProviderInfo info : infos) {
             try {
-                android.content.pm.ApplicationInfo appInfo = fPManager.getApplicationInfo(info.provider.getPackageName(), 0);
-                SubItem itm = new SubItem(info.label, fPManager.getDrawable(info.provider.getPackageName(), info.icon, appInfo));
-                itm.setProvider(info.provider);
-                Item mainItm = getPackageItem(info);
-                mainItm.getItems().add(itm);
+                String pkgName = info.provider.getPackageName();
+                android.content.pm.ApplicationInfo appInfo = pkgManager.getApplicationInfo(pkgName, 0);
+                WidgetItem widgetItem = new WidgetItem(info.label, pkgManager.getDrawable(info.provider.getPackageName(), info.icon, appInfo));
+                widgetItem.setProvider(info.provider);
+                GroupItem groupItem = getPackageItem(pkgName);
+                if (null == groupItem) {
+                    Drawable icon = pkgManager.getApplicationIcon(appInfo);
+                    String name = pkgManager.getApplicationLabel(appInfo).toString();
+                    groupItem = new GroupItem(name, icon);
+                    groupItem.setPackageName(pkgName);
+                    items.add(groupItem);
+                }
+                groupItem.getItems().add(widgetItem);
             } catch (PackageManager.NameNotFoundException ignored) {
             }
         }
     }
 
-    private void AddCustomAppWidgets() {
-        final Bundle extras = fIntent.getExtras();
+    private void addCustomAppWidgets() {
+        final Bundle extras = startIntent.getExtras();
 
         // get and validate the extras they gave us
         ArrayList<AppWidgetProviderInfo> customInfo;
         ArrayList<Bundle> customExtras = null;
-        try_custom_items:
-        {
+        try_custom_items: {
             customInfo = extras.getParcelableArrayList(AppWidgetManager.EXTRA_CUSTOM_INFO);
 
             if (customInfo == null || customInfo.size() == 0) {
@@ -218,42 +200,54 @@ public class AppWidgetPickerActivity extends Activity {
                 }
             }
         }
-        putAppWidgetItems(customInfo, customExtras);
-    }
 
-    private void putAppWidgetItems(List<AppWidgetProviderInfo> appWidgets, List<Bundle> customExtras) {
-        if (appWidgets == null) {
+        if (customInfo == null) {
             return;
         }
-        final int size = appWidgets.size();
+        final int size = customInfo.size();
         for (int i = 0; i < size; i++) {
-            AppWidgetProviderInfo info = appWidgets.get(i);
+            AppWidgetProviderInfo info = customInfo.get(i);
 
             String label = info.label;
             Drawable icon = null;
 
             if (info.icon != 0) {
-                icon = fPManager.getDrawable(info.provider.getPackageName(), info.icon, null);
+                icon = pkgManager.getDrawable(info.provider.getPackageName(), info.icon, null);
             }
 
-            Item item = new Item(label, icon);
-            SubItem subItem = new SubItem(label, icon);
+            GroupItem item = new GroupItem(label, icon);
+            WidgetItem subItem = new WidgetItem(label, icon);
             item.getItems().add(subItem);
 
             item.setPackageName(info.provider.getPackageName());
             if (customExtras != null) {
                 subItem.setExtra(customExtras.get(i));
             }
+            items.add(item);
+        }
+    }
 
-            fItems.add(item);
+    private void sortItems() {
+        Collections.sort(items, new ItemComparator());
+        for (BaseItem itm : items) {
+            if (itm instanceof GroupItem) {
+                ((GroupItem)itm).sort();
+            }
         }
     }
 
     private void bindAppWidgetId(int id, ComponentName provider)
             throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        Class[] argTypes = new Class[]{int.class, ComponentName.class};
-        Method m = AppWidgetManager.class.getMethod("bindAppWidgetId", argTypes);
-        Object[] args = new Object[]{id, provider};
-        m.invoke(fAppWManager, args);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+            // API10 hasn't method AppWidgetManager.bindAppWidgetId
+            // But it can be invoked using Reflection API
+            Class[] argTypes = new Class[]{int.class, ComponentName.class};
+            Method m = AppWidgetManager.class.getMethod("bindAppWidgetId", argTypes);
+            Object[] args = new Object[]{id, provider};
+            m.invoke(appManager, args);
+        } else {
+            // invoke method directly
+            appManager.bindAppWidgetIdIfAllowed(id, provider);
+        }
     }
 }

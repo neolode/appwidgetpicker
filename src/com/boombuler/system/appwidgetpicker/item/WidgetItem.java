@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package com.boombuler.system.appwidgetpicker;
+package com.boombuler.system.appwidgetpicker.item;
 
 import android.content.ComponentName;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
-public class SubItem {
-    public Bundle fExtra = null;
-    public ComponentName fProvider = null;
-    private String fName;
-    private Drawable fImage;
+public class WidgetItem extends BaseItem {
+    private Bundle fExtra = null;
+    private ComponentName fProvider = null;
 
-    public SubItem(String name, Drawable image) {
-        fName = name;
-        fImage = image;
+    public WidgetItem(String name, Drawable image) {
+        super(name, image);
     }
 
     public Bundle getExtra() {
@@ -45,13 +42,5 @@ public class SubItem {
 
     public void setProvider(ComponentName aValue) {
         fProvider = aValue;
-    }
-
-    public String getName() {
-        return fName;
-    }
-
-    public Drawable getImage() {
-        return fImage;
     }
 }

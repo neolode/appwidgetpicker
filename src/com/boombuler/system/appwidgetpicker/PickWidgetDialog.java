@@ -18,58 +18,62 @@ package com.boombuler.system.appwidgetpicker;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import com.boombuler.system.appwidgetpicker.item.BaseItem;
+import com.boombuler.system.appwidgetpicker.item.GroupItem;
+import com.boombuler.system.appwidgetpicker.item.WidgetItem;
 
 public class PickWidgetDialog {
-
     private final AppWidgetPickerActivity fOwner;
-    AlertDialog fDialog;
-    ItemAdapter fItemAdapter;
+    private AlertDialog dialog;
+    private ItemAdapter adapter;
 
     public PickWidgetDialog(AppWidgetPickerActivity owner) {
         fOwner = owner;
     }
 
-    public void showDialog(SubItem subItem) {
-        if (subItem == null || subItem instanceof Item) {
-            AlertDialog.Builder ab = new AlertDialog.Builder(fOwner);
+    public void showDialog() {
+        showDialog(null);
+    }
 
+    public void showDialog(BaseItem subItem) {
+        if (subItem == null || subItem instanceof GroupItem) {
+            AlertDialog.Builder ab = new AlertDialog.Builder(fOwner);
             if (subItem == null) {
                 ab.setTitle(fOwner.getString(R.string.widget_picker_title));
-                fItemAdapter = new ItemAdapter(fOwner, 0, fOwner.getItems());
-                ab.setAdapter(fItemAdapter, new ClickListener());
+                adapter = new ItemAdapter(fOwner, fOwner.getWidgetList());
             } else {
-                Item itm = (Item)subItem;
+                GroupItem itm = (GroupItem)subItem;
                 if (itm.getItems().size() == 1) {
-                    fOwner.finishOk(itm.getItems().get(0));
+                    fOwner.pickWidget((WidgetItem)itm.getItems().get(0));
                     return;
                 }
 
                 ab.setTitle(subItem.getName());
-                fItemAdapter = new ItemAdapter(fOwner, 0, itm.getItems());
-                ab.setAdapter(fItemAdapter, new ClickListener());
-            }
+                adapter = new ItemAdapter(fOwner, itm.getItems());
 
+            }
+            ab.setAdapter(adapter, new ClickListener());
             ab.setOnCancelListener(new CancelListener(subItem == null));
-            fDialog = ab.create();
-            fDialog.show();
+            dialog = ab.create();
+            dialog.show();
         } else {
-            fOwner.finishOk(subItem);
+            fOwner.pickWidget((WidgetItem)subItem);
         }
     }
 
-    private class ClickListener implements DialogInterface.OnClickListener {
+    private void dismiss() {
+        dialog.dismiss();
+    }
 
-        public ClickListener() {
-        }
+    private class ClickListener implements DialogInterface.OnClickListener {
+        private PickWidgetDialog dialog = PickWidgetDialog.this;
 
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            SubItem subItem = PickWidgetDialog.this.fItemAdapter.getItem(which);
-            PickWidgetDialog.this.fDialog.dismiss();
-
+            BaseItem subItem = PickWidgetDialog.this.adapter.getItem(which);
+            PickWidgetDialog.this.dismiss();
             PickWidgetDialog.this.showDialog(subItem);
         }
-
     }
 
     private class CancelListener implements OnCancelListener {
@@ -85,7 +89,7 @@ public class PickWidgetDialog {
                 PickWidgetDialog.this.fOwner.setResult(AppWidgetPickerActivity.RESULT_CANCELED);
                 PickWidgetDialog.this.fOwner.finish();
             } else {
-                PickWidgetDialog.this.showDialog(null);
+                PickWidgetDialog.this.showDialog();
             }
         }
     }

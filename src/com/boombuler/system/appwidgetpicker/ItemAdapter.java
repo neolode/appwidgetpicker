@@ -20,20 +20,21 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.boombuler.system.appwidgetpicker.item.BaseItem;
+import com.boombuler.system.appwidgetpicker.item.GroupItem;
 
 import java.util.ArrayList;
 
 
-public class ItemAdapter extends ArrayAdapter<SubItem> {
-    private final ArrayList<SubItem> items;
-    private final Context fContext;
-    private LayoutInflater inflater;
+public class ItemAdapter extends BaseAdapter {
+    protected Context fContext;
+    protected LayoutInflater inflater;
+    private ArrayList<BaseItem> items;
 
-    public ItemAdapter(Context context, int textViewResourceId, ArrayList<SubItem> items) {
-        super(context, textViewResourceId, items);
+    public ItemAdapter(Context context, ArrayList<BaseItem> items) {
         this.items = items;
         fContext = context;
         inflater = (LayoutInflater)fContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -45,15 +46,15 @@ public class ItemAdapter extends ArrayAdapter<SubItem> {
         if (v == null) {
             v = inflater.inflate(R.layout.appwidgetpicker, null);
         }
-        SubItem o = items.get(position);
+        BaseItem o = getItem(position);
         TextView nameView = (TextView)v.findViewById(R.id.name);
         TextView countView = (TextView)v.findViewById(R.id.count);
         ImageView imageView = (ImageView)v.findViewById(R.id.icon);
         if (nameView != null) {
             nameView.setText(o.getName());
         }
-        if (o instanceof Item) {
-            int cnt = ((Item)o).getItems().size();
+        if (o instanceof GroupItem) {
+            int cnt = ((GroupItem)o).getItems().size();
             if (cnt > 1) {
                 countView.setText(String.format(fContext.getString(R.string.widget_count), cnt));
                 countView.setVisibility(View.VISIBLE);
@@ -65,5 +66,20 @@ public class ItemAdapter extends ArrayAdapter<SubItem> {
         }
         imageView.setImageDrawable(o.getImage());
         return v;
+    }
+
+    @Override
+    public int getCount() {
+        return items.size();
+    }
+
+    @Override
+    public BaseItem getItem(int i) {
+        return items.get(i);
+    }
+
+    @Override
+    public long getItemId(int i) {
+        return i;
     }
 }

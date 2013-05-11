@@ -34,6 +34,12 @@ public class ItemAdapter extends BaseAdapter {
     protected LayoutInflater inflater;
     private ArrayList<BaseItem> items;
 
+    private class ViewHolder {
+        private TextView nameView;
+        private TextView countView;
+        private ImageView imageView;
+    }
+
     public ItemAdapter(Context context, ArrayList<BaseItem> items) {
         this.items = items;
         fContext = context;
@@ -41,31 +47,39 @@ public class ItemAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View v = convertView;
-        if (v == null) {
-            v = inflater.inflate(R.layout.appwidgetpicker, null);
-        }
+    public View getView(int position, View view, ViewGroup parent) {
+        ViewHolder vh;
         BaseItem o = getItem(position);
-        TextView nameView = (TextView)v.findViewById(R.id.name);
-        TextView countView = (TextView)v.findViewById(R.id.count);
-        ImageView imageView = (ImageView)v.findViewById(R.id.icon);
-        if (nameView != null) {
-            nameView.setText(o.getName());
-        }
+        boolean hideWidgetSize = true;
+        int widgetCount = 0;
         if (o instanceof GroupItem) {
-            int cnt = ((GroupItem)o).getItems().size();
-            if (cnt > 1) {
-                countView.setText(String.format(fContext.getString(R.string.widget_count), cnt));
-                countView.setVisibility(View.VISIBLE);
-            } else {
-                countView.setVisibility(View.GONE);
-            }
-        } else {
-            countView.setVisibility(View.GONE);
+            widgetCount = ((GroupItem)o).getItems().size();
+            hideWidgetSize = widgetCount == 1;
         }
-        imageView.setImageDrawable(o.getImage());
-        return v;
+        if (view == null) {
+            view = inflater.inflate(R.layout.appwidgetpicker, null);
+            vh = new ViewHolder();
+            vh.nameView = (TextView)view.findViewById(R.id.name);
+            vh.countView = (TextView)view.findViewById(R.id.count);
+            vh.imageView = (ImageView)view.findViewById(R.id.icon);
+            if (hideWidgetSize) {
+                vh.countView.setVisibility(View.GONE);
+                vh.nameView.setMaxLines(2);
+            } else {
+                vh.nameView.setMaxLines(1);
+                vh.countView.setMaxLines(1);
+            }
+            view.setTag(vh);
+        } else {
+            vh = (ViewHolder)view.getTag();
+        }
+
+        vh.nameView.setText(o.getName());
+        if (!hideWidgetSize) {
+            vh.countView.setText(String.format(fContext.getString(R.string.widget_count), widgetCount));
+        }
+        vh.imageView.setImageDrawable(o.getImage());
+        return view;
     }
 
     @Override

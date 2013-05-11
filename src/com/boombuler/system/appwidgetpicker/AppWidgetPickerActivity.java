@@ -55,7 +55,7 @@ public class AppWidgetPickerActivity extends Activity {
             pkgManager = getPackageManager();
             appManager = AppWidgetManager.getInstance(this);
 
-            addAppWidgets();
+            addAndroidWidgets();
             addLauncherWidgets();
             sortItems();
 
@@ -138,7 +138,7 @@ public class AppWidgetPickerActivity extends Activity {
         return null;
     }
 
-    private void addAppWidgets() {
+    private void addAndroidWidgets() {
         items = new ArrayList<BaseItem>();
         List<AppWidgetProviderInfo> infos = appManager.getInstalledProviders();
         for (AppWidgetProviderInfo info : infos) {
@@ -154,7 +154,7 @@ public class AppWidgetPickerActivity extends Activity {
                     groupItem = new GroupItem(name, icon);
                     groupItem.setPackageName(pkgName);
                     items.add(groupItem);
-                    Log.d("AppWidgetPicker", "addAppWidgets: " + groupItem.getName());
+                    Log.d("AppWidgetPicker", "addAndroidWidgets: " + groupItem.getName());
                 }
                 groupItem.getItems().add(widgetItem);
             } catch (PackageManager.NameNotFoundException ignored) {

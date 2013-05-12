@@ -35,29 +35,27 @@ public class PickWidgetDialog {
         showDialog(null);
     }
 
-    public void showDialog(BaseItem subItem) {
-        if (subItem == null || subItem instanceof GroupItem) {
+    public void showDialog(BaseItem item) {
+        if (item == null || item instanceof GroupItem) {
             AlertDialog.Builder ab = new AlertDialog.Builder(fOwner);
-            if (subItem == null) {
+            if (item == null) {
                 ab.setTitle(fOwner.getString(R.string.widget_picker_title));
                 adapter = new ItemAdapter(fOwner, fOwner.getWidgetList());
             } else {
-                GroupItem itm = (GroupItem)subItem;
-                if (itm.getItems().size() == 1) {
-                    fOwner.pickWidget((WidgetItem)itm.getItems().get(0));
+                GroupItem groupItem = (GroupItem)item;
+                if (groupItem.getItems().size() == 1) {
+                    fOwner.pickWidget(groupItem.getItems().get(0));
                     return;
                 }
-
-                ab.setTitle(subItem.getName());
-                adapter = new ItemAdapter(fOwner, itm.getItems());
-
+                ab.setTitle(item.getName());
+                adapter = new ItemAdapter(fOwner, groupItem.getItems());
             }
             ab.setAdapter(adapter, new ClickListener());
-            ab.setOnCancelListener(new CancelListener(subItem == null));
+            ab.setOnCancelListener(new CancelListener(item == null));
             dialog = ab.create();
             dialog.show();
         } else {
-            fOwner.pickWidget((WidgetItem)subItem);
+            fOwner.pickWidget((WidgetItem)item);
         }
     }
 

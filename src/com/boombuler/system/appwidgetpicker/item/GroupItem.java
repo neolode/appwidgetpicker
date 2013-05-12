@@ -21,14 +21,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class GroupItem extends BaseItem {
-    private final ArrayList<BaseItem> fItems = new ArrayList<BaseItem>();
+    private final ArrayList<WidgetItem> fItems = new ArrayList<WidgetItem>();
     private String fPackageName;
 
     public GroupItem(String name, Drawable image) {
         super(name, image);
     }
 
-    public ArrayList<BaseItem> getItems() {
+    public ArrayList<WidgetItem> getItems() {
         return fItems;
     }
 

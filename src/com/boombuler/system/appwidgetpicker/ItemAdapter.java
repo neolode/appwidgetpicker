@@ -32,7 +32,7 @@ import java.util.ArrayList;
 public class ItemAdapter extends BaseAdapter {
     protected Context fContext;
     protected LayoutInflater inflater;
-    private ArrayList<BaseItem> items;
+    private ArrayList<? extends BaseItem> items;
 
     private class ViewHolder {
         private TextView nameView;
@@ -40,7 +40,7 @@ public class ItemAdapter extends BaseAdapter {
         private ImageView imageView;
     }
 
-    public ItemAdapter(Context context, ArrayList<BaseItem> items) {
+    public ItemAdapter(Context context, ArrayList<? extends BaseItem> items) {
         this.items = items;
         fContext = context;
         inflater = (LayoutInflater)fContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);

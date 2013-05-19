@@ -28,57 +28,31 @@ import com.boombuler.system.appwidgetpicker.item.GroupItem;
 
 import java.util.ArrayList;
 
-
 public class ItemAdapter extends BaseAdapter {
-    protected Context fContext;
+    protected Context context;
     protected LayoutInflater inflater;
     private ArrayList<? extends BaseItem> items;
 
-    private class ViewHolder {
-        private TextView nameView;
-        private TextView countView;
-        private ImageView imageView;
-    }
-
     public ItemAdapter(Context context, ArrayList<? extends BaseItem> items) {
         this.items = items;
-        fContext = context;
-        inflater = (LayoutInflater)fContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        this.context = context;
+        this.inflater = LayoutInflater.from(context);
     }
 
     @Override
     public View getView(int position, View view, ViewGroup parent) {
         ViewHolder vh;
-        BaseItem o = getItem(position);
-        boolean hideWidgetSize = true;
-        int widgetCount = 0;
-        if (o instanceof GroupItem) {
-            widgetCount = ((GroupItem)o).getItems().size();
-            hideWidgetSize = widgetCount == 1;
-        }
         if (view == null) {
             view = inflater.inflate(R.layout.appwidgetpicker, null);
             vh = new ViewHolder();
             vh.nameView = (TextView)view.findViewById(R.id.name);
             vh.countView = (TextView)view.findViewById(R.id.count);
             vh.imageView = (ImageView)view.findViewById(R.id.icon);
-            if (hideWidgetSize) {
-                vh.countView.setVisibility(View.GONE);
-                vh.nameView.setMaxLines(2);
-            } else {
-                vh.nameView.setMaxLines(1);
-                vh.countView.setMaxLines(1);
-            }
             view.setTag(vh);
         } else {
             vh = (ViewHolder)view.getTag();
         }
-
-        vh.nameView.setText(o.getName());
-        if (!hideWidgetSize) {
-            vh.countView.setText(String.format(fContext.getString(R.string.widget_count), widgetCount));
-        }
-        vh.imageView.setImageDrawable(o.getImage());
+        vh.populateFrom(getItem(position));
         return view;
     }
 
@@ -95,5 +69,32 @@ public class ItemAdapter extends BaseAdapter {
     @Override
     public long getItemId(int i) {
         return i;
+    }
+
+    private class ViewHolder {
+        private TextView nameView;
+        private TextView countView;
+        private ImageView imageView;
+
+        private void populateFrom(BaseItem item) {
+            boolean hideWidgetSize = true;
+            int widgetCount = 0;
+            if (item instanceof GroupItem) {
+                widgetCount = ((GroupItem)item).getItems().size();
+                hideWidgetSize = (widgetCount == 1);
+            }
+            nameView.setText(item.getName());
+            if (!hideWidgetSize) {
+                countView.setText(String.format(context.getString(R.string.widget_count), widgetCount));
+            }
+            imageView.setImageDrawable(item.getImage());
+            if (hideWidgetSize) {
+                nameView.setMaxLines(2);
+                countView.setVisibility(View.GONE);
+            } else {
+                nameView.setMaxLines(1);
+                countView.setMaxLines(1);
+            }
+        }
     }
 }
